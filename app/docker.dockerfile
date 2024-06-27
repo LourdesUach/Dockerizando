@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y git
 RUN git clone https://github.com/LourdesUach/Dockerizando.git .
 
 # Compilar el programa Java
-RUN javac App.java
+RUN javac main.java
 
 # Ejecutar el programa Java
 CMD ["java", "App"]
