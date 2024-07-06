@@ -1,17 +1,26 @@
-# Usar una imagen base de OpenJDK
-FROM openjdk:11-jdk-slim
+# Usa una imagen base de Java para compilar el código
+FROM openjdk:11-jdk-slim AS build
 
-# Establecer el directorio de trabajo
+# Establece el directorio de trabajo en el contenedor
 WORKDIR /app
 
-# Instalar git
-RUN apt-get update && apt-get install -y git
+# Copia el código fuente al contenedor
+COPY src /app/src
 
-# Clonar el repositorio
-RUN git clone https://github.com/LourdesUach/Dockerizando.git .
+# Compila el código fuente
+RUN javac /app/src/Main.java -d /app/out
 
-# Compilar el programa Java
-RUN javac main.java
+# Crea un archivo JAR
+RUN jar cfe /app/my-java-app.jar Main -C /app/out .
 
-# Ejecutar el programa Java
-CMD ["java", "App"]
+# Usa una imagen base más pequeña para ejecutar el JAR
+FROM openjdk:11-jre-slim
+
+# Establece el directorio de trabajo en el contenedor
+WORKDIR /app
+
+# Copia el archivo JAR desde la fase de compilación
+COPY --from=build /app/my-java-app.jar /app/my-java-app.jar
+
+# Ejecuta la aplicación
+CMD ["java", "-jar", "my-java-app.jar"]
